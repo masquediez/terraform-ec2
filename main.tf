@@ -59,24 +59,21 @@ resource "aws_security_group" "http" {
 }
 
 # Erstelle eine EC2-Instance
-resource "aws_instance" "web" {
-  ami                    = "ami-01e444924a2233b07" # Ubuntu Server 20.04 LTS für eu-central-1
-  instance_type          = "t2.micro"
-  subnet_id              = data.terraform_remote_state.vpc.outputs.public_subnet_id_1a # Nutzt ein öffentliches Subnetz
-  vpc_security_group_ids = [aws_security_group.http.id]                                # Nutzt VPC-Security-Gruppen
-  key_name               = "llave1"
-
-  user_data = <<-EOF
+user_data = <<-EOF
               #!/bin/bash
-              apt-get update
-              apt-get install -y apache2
-              echo "<html><body><h1>Hello, World</h1></body></html>" > /var/www/html/index.html
-              systemctl enable apache2
-              systemctl start apache2
+              sudo apt update -y
+              sudo apt upgrade -y
+              sudo apt install docker.io -y
+              sudo service docker start
+              sudo usermod -a -G docker $(whoami)
+              newgrp docker
+              docker --version
+              sudo docker volume create portainer_data
+              sudo docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
               EOF
 
   tags = {
-    Name = "web-server"
+    Name = "docker-portainer"
   }
 }
 
