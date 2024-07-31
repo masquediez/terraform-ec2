@@ -58,14 +58,15 @@ resource "aws_security_group" "http" {
 
 # Erstelle eine EC2-Instance
 resource "aws_instance" "web" {
-  ami           = "ami-0c55b159cbfafe1f0" # Sustituir por una AMI válida en eu-central-1
+  ami           = "ami-0e872aee57663ae2d"
   instance_type = "t2.micro"
-  subnet_id     = data.terraform_remote_state.vpc.outputs.public_subnet_ids[0]
-  security_groups = [aws_security_group.http.name]
+  subnet_id     = data.terraform_remote_state.vpc.outputs.public_subnet_ids["0"]
+  vpc_security_group_ids = [aws_security_group.http.id]
 
   user_data = <<-EOF
               #!/bin/bash
               sudo apt update -y
+              sudo apt upgrade -y
               sudo apt install docker.io -y
               sudo service docker start
               sudo usermod -a -G docker $(whoami)
