@@ -31,10 +31,10 @@ resource "aws_security_group" "http" {
   }
 
   ingress {
-      from_port   = 8000
-      to_port     = 8000
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
@@ -43,8 +43,6 @@ resource "aws_security_group" "http" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-
 
   egress {
     from_port   = 0
@@ -59,7 +57,13 @@ resource "aws_security_group" "http" {
 }
 
 # Erstelle eine EC2-Instance
-user_data = <<-EOF
+resource "aws_instance" "web" {
+  ami           = "ami-0c55b159cbfafe1f0" # Sustituir por una AMI válida en eu-central-1
+  instance_type = "t2.micro"
+  subnet_id     = data.terraform_remote_state.vpc.outputs.public_subnet_ids[0]
+  security_groups = [aws_security_group.http.name]
+
+  user_data = <<-EOF
               #!/bin/bash
               sudo apt update -y
               sudo apt upgrade -y
